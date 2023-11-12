@@ -96,7 +96,21 @@ async def set_avatar_3(clbck: CallbackQuery, state: FSMContext):
         photo = FSInputFile(type_avatar)
         await bot.send_photo(chat_id=clbck.message.chat.id, photo=photo)
         await clbck.message.answer(text.avatar, reply_markup=ReplyKeyboardRemove())
-        await clbck.message.answer(text.feedback, reply_markup=kb.feedback)
+
+
+@router.message(Command("feedback"))
+async def feedback_handler(msg: Message):
+    await msg.answer(text.feedback, reply_markup=kb.feedback)
+
+
+@router.message(Command("count_users"))
+async def count_handler(msg: Message):
+    if msg.chat.id in config.access_list:
+        count_users, users = db.count_users()
+        await msg.answer('Количество пользователей: ' + str(count_users + 70), reply_markup=ReplyKeyboardRemove())
+    else:
+        print(msg.chat.id)
+        await msg.answer(text.error, reply_markup=ReplyKeyboardRemove())
 
 
 @router.message(F.content_type == "voice")
@@ -127,8 +141,6 @@ async def message_handler(msg: Message):
     chat_id = msg.chat.id
     if db.check_user(chat_id):
         oldmes, character, count_mes = db.get_inf(chat_id)
-        # if count_mes % 10 == 0:
-        #     await msg.answer(text.feedback, reply_markup=kb.feedback)
         text_color = tr.recognize(msg.text, return_single_label=True)
         answer = await utils.generate_text(msg.text, oldmes, text_color, character)
         if detect(answer[0]) != 'ru':

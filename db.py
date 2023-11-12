@@ -1,7 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-path_to_key = "dora-556f1-firebase-adminsdk-4ujwi-bfddc6bd09.json"
+path_to_key = "dora-556f1-firebase-adminsdk-4ujwi-fad627ea2f.json"
 
 cred = credentials.Certificate(path_to_key)
 firebase_admin.initialize_app(cred)
@@ -15,14 +15,14 @@ def create_user(id_user):
 
 
 def check_user(id_user):
-    collection_ref = db.collection('users')
+    collection_ref = db.collection(collection_name)
     document_ref = collection_ref.document(str(id_user))
     document = document_ref.get()
     return document.exists
 
 
 def check_avatar(id_user):
-    collection_ref = db.collection('users')
+    collection_ref = db.collection(collection_name)
     document_ref = collection_ref.document(str(id_user))
     document = document_ref.get().to_dict()
     return 'characteristic_avatar' in document.keys()
@@ -65,3 +65,13 @@ def get_inf(id_user):
     for value in history.values():
         messages += value
     return messages, character, len(history)
+
+
+def count_users():
+    collection_ref = db.collection(collection_name)
+    doc_refs = collection_ref.list_documents()
+    users = ''
+    for doc in doc_refs:
+        users += doc.id + '\n'
+    print(users)
+    return len(list(collection_ref.stream())), users
