@@ -8,6 +8,8 @@ from aniemore.models import HuggingFaceModel
 from aniemore.recognizers.text import TextRecognizer
 from aniemore.recognizers.voice import VoiceRecognizer
 from pathlib import Path
+
+from deep_translator import GoogleTranslator
 from langdetect import detect
 
 import audio_transcribe
@@ -128,7 +130,7 @@ async def voice_handler(msg: Message):
         oldmes, character, count_mes = db.get_inf(msg.chat.id)
         answer = await utils.generate_text(text_speech, oldmes, voice_color, character)
         if detect(answer[0]) != 'ru':
-            answer = await utils.translated_text(answer[0])
+            answer = GoogleTranslator(source='auto', target='ru').translate(answer[0])
         db.add_text(chat_id, text_speech, answer[0])
         await msg.answer(answer[0], disable_web_page_preview=True)
     else:
@@ -144,7 +146,8 @@ async def message_handler(msg: Message):
         text_color = tr.recognize(msg.text, return_single_label=True)
         answer = await utils.generate_text(msg.text, oldmes, text_color, character)
         if detect(answer[0]) != 'ru':
-            answer = await utils.translated_text(answer[0])
+            answer = GoogleTranslator(source='auto', target='ru').translate(answer[0])
+        print(answer[1])
         db.add_text(chat_id, msg.text, answer[0])
         await msg.answer(answer[0], disable_web_page_preview=True)
 
